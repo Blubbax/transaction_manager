@@ -1,0 +1,54 @@
+package com.blubbax.esa.transactionManager.Transaction;
+
+import com.blubbax.esa.transactionManager.Transaction.entity.Transaction;
+import com.blubbax.esa.transactionManager.Transaction.exception.TransactionNotFoundException;
+import com.blubbax.esa.transactionManager.Transaction.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
+
+@Service
+public class TransactionService {
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    public List<Transaction> getAllTransactionDatasets() {
+        return transactionRepository.findAll();
+    }
+
+    public Transaction getTransactionDataset(Long id) {
+        return transactionRepository.findById(id).orElseThrow(() -> new TransactionNotFoundException(id));
+    }
+
+    public List<Transaction> getAllTransactionDatasetsByUser(String userId) {
+        return transactionRepository.findByUserId(userId);
+    }
+
+    public Transaction saveTransactionDataset(@RequestBody Transaction transaction) {
+        return transactionRepository.save(transaction);
+    }
+
+    public Transaction updateTransactionDataset(@PathVariable Long id, @RequestBody Transaction newTransaction) {
+        return transactionRepository.findById(id)
+                .map(transaction -> {
+                    transaction.setDate(newTransaction.getDate());
+                    transaction.setAmount(newTransaction.getAmount());
+                    transaction.setDescription(newTransaction.getDescription());
+                    transaction.setUserId(newTransaction.getUserId());
+                    return transactionRepository.save(transaction);
+                }).orElseGet(() -> {
+                    newTransaction.setId(id);
+                    return transactionRepository.save(newTransaction);
+                });
+    }
+
+    public void deleteTransactionDataset(@PathVariable Long id) throws EmptyResultDataAccessException {
+        transactionRepository.deleteById(id);
+    }
+
+}
