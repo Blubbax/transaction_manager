@@ -29,7 +29,6 @@ jobs:
         run: mvn -B package -DskipTests --file pom.xml
       - name: Build the Docker image
         run: docker build -t np123dev/transaction_manager .
-       
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
