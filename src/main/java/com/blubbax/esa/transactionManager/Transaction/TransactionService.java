@@ -1,5 +1,6 @@
 package com.blubbax.esa.transactionManager.Transaction;
 
+import com.blubbax.esa.transactionManager.Transaction.entity.Summary;
 import com.blubbax.esa.transactionManager.Transaction.entity.Transaction;
 import com.blubbax.esa.transactionManager.Transaction.exception.TransactionNotFoundException;
 import com.blubbax.esa.transactionManager.Transaction.repository.TransactionRepository;
@@ -49,6 +50,17 @@ public class TransactionService {
 
     public void deleteTransactionDataset(@PathVariable Long id) throws EmptyResultDataAccessException {
         transactionRepository.deleteById(id);
+    }
+
+    public Summary calculateSummaryForUser(String userId) {
+        List<Transaction> transactions = this.getAllTransactionDatasetsByUser(userId);
+        Summary summary = new Summary();
+
+        for (Transaction transaction : transactions) {
+            summary.considerTransaction(transaction);
+        }
+
+        return summary;
     }
 
 }

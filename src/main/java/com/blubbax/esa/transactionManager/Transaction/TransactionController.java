@@ -1,5 +1,6 @@
 package com.blubbax.esa.transactionManager.Transaction;
 
+import com.blubbax.esa.transactionManager.Transaction.entity.Summary;
 import com.blubbax.esa.transactionManager.Transaction.exception.TransactionNotFoundException;
 import com.blubbax.esa.transactionManager.Transaction.entity.Transaction;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class TransactionController {
 
     private final TransactionService transactionService;
@@ -71,6 +73,12 @@ public class TransactionController {
         } catch (EmptyResultDataAccessException ex) {
             throw new TransactionNotFoundException(id);
         }
+    }
+
+    @Operation(summary = "Get summary for user")
+    @GetMapping("/api/summary/{userId}")
+    public Summary getSummary(@PathVariable String userId) {
+        return transactionService.calculateSummaryForUser(userId);
     }
 
 }
