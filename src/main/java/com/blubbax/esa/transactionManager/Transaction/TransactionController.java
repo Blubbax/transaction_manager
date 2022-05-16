@@ -25,7 +25,7 @@ public class TransactionController {
     }
 
     @Operation(summary = "Get root system info")
-    @GetMapping("/api")
+    @GetMapping("/")
     public String getRoot() {
         return "Transaction Manager API";
     }
