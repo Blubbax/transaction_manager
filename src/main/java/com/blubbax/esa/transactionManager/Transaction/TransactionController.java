@@ -24,6 +24,12 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
+    @Operation(summary = "Get root system info")
+    @GetMapping("/api")
+    public String getRoot() {
+        return "Transaction Manager API";
+    }
+
     @Operation(summary = "Get current server status")
     @GetMapping("/api")
     public String getInfo() {
