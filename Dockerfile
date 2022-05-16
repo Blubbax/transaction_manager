@@ -9,6 +9,7 @@ COPY src src
 
 RUN apt-get update && apt-get install dos2unix
 RUN dos2unix ./mvnw
+RUN chmod +x ./mvnw
 RUN ./mvnw package
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
 
