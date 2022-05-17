@@ -47,9 +47,9 @@ spec:
           periodSeconds: 10
         resources:
           limits:
-            cpu: 300m
+            cpu: 400m
           requests:
-            cpu: 100m
+            cpu: 200m
 ---
 apiVersion: v1
 kind: Service
@@ -81,3 +81,15 @@ spec:
       port:
         number: 8080
 ---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mm-transaction-api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mm-transaction-api
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75
