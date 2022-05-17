@@ -31,6 +31,25 @@ spec:
           value: '1234'
         - name: DB_USERNAME
           value: 'root'
+        readinessProbe:
+          httpGet:
+            path: /api/health/readiness
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /api/health/liveness
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 300m
+          requests:
+            cpu: 100m
 ---
 apiVersion: v1
 kind: Service

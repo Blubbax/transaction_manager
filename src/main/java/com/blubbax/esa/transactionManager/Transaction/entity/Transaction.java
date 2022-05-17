@@ -1,5 +1,7 @@
 package com.blubbax.esa.transactionManager.Transaction.entity;
 
+import org.springframework.data.annotation.Version;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
