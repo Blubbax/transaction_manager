@@ -50,6 +50,13 @@ spec:
             scheme: HTTP
           initialDelaySeconds: 30
           periodSeconds: 10
+        startupProbe:
+          httpGet:
+            path: /api/health/readiness
+            port: 8080
+            schema: HTTP
+          failureThreshold: 30
+          periodSeconds: 10
         resources:
           limits:
             cpu: 400m
