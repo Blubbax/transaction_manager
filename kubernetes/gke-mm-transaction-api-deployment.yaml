@@ -14,6 +14,11 @@ spec:
         app: mm-transaction-api
         tier: api
     spec:
+      strategy:
+        type: RollingUpdate
+        rollingUpdate:
+          maxUnavailable: 0
+          maxSurge: 2
       containers:
       - image: np123dev/transaction_manager:latest
         name: mm-transaction-api
@@ -93,3 +98,4 @@ spec:
   minReplicas: 2
   maxReplicas: 10
   targetCPUUtilizationPercentage: 75
+  ---
