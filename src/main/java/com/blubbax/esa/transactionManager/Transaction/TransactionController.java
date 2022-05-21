@@ -13,6 +13,7 @@ import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -63,13 +64,25 @@ public class TransactionController {
 
     @Operation(summary = "Save new hydroponic log entry")
     @PostMapping("/api/transaction")
-    public Transaction saveTransactionDataset(@RequestBody Transaction transaction) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Transaction successfully created",
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Transaction.class))}),
+            @ApiResponse(responseCode = "400", description = "Transaction data not valid",
+                    content = @Content)
+    })
+    public Transaction saveTransactionDataset(@RequestBody @Valid Transaction transaction) {
         return transactionService.saveTransactionDataset(transaction);
     }
 
     @Operation(summary = "Update transaction by its id")
     @PutMapping("/api/transaction/{id}")
-    public Transaction updateTransactionDataset(@PathVariable Long id, @RequestBody Transaction newTransaction) {
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Transaction successfully updated",
+                    content = { @Content(mediaType = "application/json", schema = @Schema(implementation = Transaction.class))}),
+            @ApiResponse(responseCode = "400", description = "Transaction data not valid",
+                    content = @Content)
+    })
+    public Transaction updateTransactionDataset(@PathVariable Long id, @RequestBody @Valid Transaction newTransaction) {
         return transactionService.updateTransactionDataset(id, newTransaction);
     }
 

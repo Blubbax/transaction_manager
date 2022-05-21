@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Version;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Objects;
 
@@ -12,10 +14,18 @@ import java.util.Objects;
 public class Transaction {
 
     private @Id @GeneratedValue Long id;
+
+    @NotEmpty
     private String userId;
+
     private Date date;
+
+    @NotNull
     private double amount;
+
     private String description;
+
+
 
     public Transaction() {}
 
