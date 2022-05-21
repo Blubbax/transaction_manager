@@ -54,7 +54,6 @@ spec:
           httpGet:
             path: /api/health/readiness
             port: 8080
-            schema: HTTP
           failureThreshold: 30
           periodSeconds: 10
         resources:
