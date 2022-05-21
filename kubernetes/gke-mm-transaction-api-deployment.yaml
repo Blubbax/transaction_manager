@@ -8,17 +8,17 @@ spec:
     matchLabels:
       app: mm-transaction-api
       tier: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 2
   template:
     metadata:
       labels:
         app: mm-transaction-api
         tier: api
     spec:
-      strategy:
-        type: RollingUpdate
-        rollingUpdate:
-          maxUnavailable: 0
-          maxSurge: 2
       containers:
       - image: np123dev/transaction_manager:latest
         name: mm-transaction-api
