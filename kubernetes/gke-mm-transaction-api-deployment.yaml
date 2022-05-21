@@ -8,6 +8,11 @@ spec:
     matchLabels:
       app: mm-transaction-api
       tier: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 2
   template:
     metadata:
       labels:
