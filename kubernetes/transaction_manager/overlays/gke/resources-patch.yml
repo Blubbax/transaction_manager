@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mm-transaction-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: mm-transaction-api
+          resources:
+            limits:
+              cpu: 400m
+            requests:
+              cpu: 200m

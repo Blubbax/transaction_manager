@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mm-transaction-api
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: mm-transaction-api
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: mm-transaction-api
+        tier: api
+    spec:
+      containers:
+        - image: np123dev/transaction_manager:latest
+          name: mm-transaction-api
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: DB_HOST
+              value: $(MM_TRANSACTION_MYSQL_SERVICE_HOST)
+            - name: DB_PORT
+              value: $(MM_TRANSACTION_MYSQL_SERVICE_PORT)
+            - name: DB_NAME
+              value: 'transaction'
+            - name: DB_PASSWORD
+              value: '1234'
+            - name: DB_USERNAME
+              value: 'root'
+---

@@ -1,0 +1,13 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mm-transaction-api-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "transaction-api-ip"
+spec:
+  defaultBackend:
+    service:
+      name: mm-transaction-api
+      port:
+        number: 8080
+---
