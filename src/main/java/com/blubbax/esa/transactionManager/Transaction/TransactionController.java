@@ -64,9 +64,6 @@ public class TransactionController {
             @RequestParam(value = "page", defaultValue = "0", required = false) int page,
             @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
 
-        System.out.println("Page " + page);
-        System.out.println("Size " + size);
-
         Page<Transaction> transcation_page = transactionService.getAllTransactionDatasetsByUser(userId, page, size);
 
         if (page >= transcation_page.getTotalPages()) {
