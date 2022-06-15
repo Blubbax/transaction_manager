@@ -82,10 +82,10 @@ public class TransactionController {
         links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, 0, size)).toString()
                 .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "first"));
 
-        links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, transcation_page.getTotalPages(), size)).toString()
+        links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, transcation_page.getTotalPages() - 1, size)).toString()
                 .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "last"));
 
-        if (page + 1 <= transcation_page.getTotalPages())
+        if (page + 1 < transcation_page.getTotalPages())
             links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, page + 1, size)).toString()
                     .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "next"));
 
