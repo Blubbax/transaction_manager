@@ -1,6 +1,7 @@
 package com.blubbax.esa.transactionManager.Transaction.entity;
 
 import org.springframework.data.annotation.Version;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,7 +12,7 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-public class Transaction {
+public class Transaction extends RepresentationModel<Transaction> {
 
     private @Id @GeneratedValue Long id;
 

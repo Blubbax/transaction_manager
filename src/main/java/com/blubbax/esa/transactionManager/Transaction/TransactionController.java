@@ -11,10 +11,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.RepresentationModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -57,9 +65,15 @@ public class TransactionController {
             @ApiResponse(responseCode = "404", description = "No transaction found",
                     content = @Content)
     })
-    @GetMapping("/api/transaction/{id}")
-    public Transaction getTransactionDataset(@PathVariable Long id) {
-        return transactionService.getTransactionDataset(id);
+    @GetMapping(value = "/api/transaction/{id}", produces = { "application/hal+json" })
+    public RepresentationModel<Transaction> getTransactionDataset(@PathVariable Long id) {
+        Transaction transaction = transactionService.getTransactionDataset(id);
+
+        ArrayList<Link> links = new ArrayList<>();
+        links.add(linkTo(methodOn(TransactionController.class).getTransactionDataset(transaction.getId())).withSelfRel());
+        links.add(linkTo(methodOn(TransactionController.class).updateTransactionDataset(transaction.getId(), transaction)).withRel("update"));
+        RepresentationModel<Transaction> result = (RepresentationModel<Transaction>) RepresentationModel.of(transaction, links);
+        return result;
     }
 
     @Operation(summary = "Save new hydroponic log entry")
