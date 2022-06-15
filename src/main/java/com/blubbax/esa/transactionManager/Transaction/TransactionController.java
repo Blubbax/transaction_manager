@@ -8,14 +8,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.availability.AvailabilityChangeEvent;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.RepresentationModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+import org.springframework.hateoas.server.mvc.BasicLinkBuilder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -49,22 +46,26 @@ public class TransactionController {
 
     @Operation(summary = "Get all transactions")
     @GetMapping(value = "/api/transaction", produces = { "application/hal+json" })
-    public List<Transaction> getAllTransactionDatasets() {
+    public CollectionModel<Transaction> getAllTransactionDatasets() {
 
         List<Transaction> transactions = transactionService.getAllTransactionDatasets();
         for(final Transaction transaction: transactions) {
-            transaction.add(linkTo(methodOn(TransactionController.class).getTransactionDataset(transaction.getId())).withSelfRel());
+            transaction.add(Link.of(linkTo(methodOn(TransactionController.class).getTransactionDataset(transaction.getId())).toString()
+                    .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "self"));
         }
 
-        return  transactions;
+        return CollectionModel.of(transactions);
     }
 
     @Operation(summary = "Get all transactions for a user")
-    @GetMapping(value = "/api/transaction/user/{userId}", produces = { "application/hal+json" }, params = { "page", "size" })
+    @GetMapping(value = "/api/transaction/user/{userId}", produces = { "application/hal+json" })
     public CollectionModel<Transaction> getAllTransactionDatasetsByUser(
             @PathVariable String userId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
+
+        System.out.println("Page " + page);
+        System.out.println("Size " + size);
 
         Page<Transaction> transcation_page = transactionService.getAllTransactionDatasetsByUser(userId, page, size);
 
@@ -75,16 +76,26 @@ public class TransactionController {
         List<Transaction> transcations = transcation_page.toList();
 
         for(final Transaction transaction: transcations) {
-            transaction.add(linkTo(methodOn(TransactionController.class).getTransactionDataset(transaction.getId())).withSelfRel());
+            transaction.add(Link.of(linkTo(methodOn(TransactionController.class).getTransactionDataset(transaction.getId())).toString()
+                    .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "self"));
         }
 
         ArrayList<Link> links = new ArrayList<>();
-        links.add(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, 0, size)).withRel("first"));
-        links.add(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, transcation_page.getTotalPages(), size)).withRel("last"));
-        if (page + 1 < transcation_page.getTotalPages())
-            links.add(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, page + 1, size)).withRel("next"));
+
+        links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, 0, size)).toString()
+                .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "first"));
+
+        links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, transcation_page.getTotalPages(), size)).toString()
+                .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "last"));
+
+        if (page + 1 <= transcation_page.getTotalPages())
+            links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, page + 1, size)).toString()
+                    .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "next"));
+
         if (page > 0)
-            links.add(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, page - 1, size)).withRel("prev"));
+            links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, page - 1, size)).toString()
+                    .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "prev"));
+
         CollectionModel<Transaction> result = CollectionModel.of(transcations, links);
 
         return result;
@@ -98,13 +109,13 @@ public class TransactionController {
                     content = @Content)
     })
     @GetMapping(value = "/api/transaction/{id}", produces = { "application/hal+json" })
-    public RepresentationModel<Transaction> getTransactionDataset(@PathVariable Long id) {
+    public Transaction getTransactionDataset(@PathVariable Long id) {
         Transaction transaction = transactionService.getTransactionDataset(id);
 
-        ArrayList<Link> links = new ArrayList<>();
-        links.add(linkTo(methodOn(TransactionController.class).getTransactionDataset(transaction.getId())).withSelfRel());
-        RepresentationModel<Transaction> result = (RepresentationModel<Transaction>) RepresentationModel.of(transaction, links);
-        return result;
+        transaction.add(Link.of(linkTo(methodOn(TransactionController.class).getTransactionDataset(transaction.getId())).toString()
+                .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "self"));
+
+        return transaction;
     }
 
     @Operation(summary = "Save new transaction")
@@ -117,7 +128,8 @@ public class TransactionController {
     })
     public Transaction saveTransactionDataset(@RequestBody @Valid Transaction transaction) {
         Transaction new_transaction = transactionService.saveTransactionDataset(transaction);
-        new_transaction.add(linkTo(methodOn(TransactionController.class).getTransactionDataset(new_transaction.getId())).withSelfRel());
+        new_transaction.add(Link.of(linkTo(methodOn(TransactionController.class).getTransactionDataset(new_transaction.getId())).toString()
+                .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "self"));
         return new_transaction;
     }
 
@@ -131,7 +143,10 @@ public class TransactionController {
     })
     public Transaction updateTransactionDataset(@PathVariable Long id, @RequestBody @Valid Transaction newTransaction) {
         Transaction updated_transaction = transactionService.updateTransactionDataset(id, newTransaction);
-        updated_transaction.add(linkTo(methodOn(TransactionController.class).getTransactionDataset(updated_transaction.getId())).withSelfRel());
+
+        updated_transaction.add(Link.of(linkTo(methodOn(TransactionController.class).getTransactionDataset(updated_transaction.getId())).toString()
+                .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "self"));
+
         return updated_transaction;
     }
 
