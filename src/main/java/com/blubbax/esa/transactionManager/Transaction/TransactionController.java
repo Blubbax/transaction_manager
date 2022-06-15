@@ -1,6 +1,7 @@
 package com.blubbax.esa.transactionManager.Transaction;
 
 import com.blubbax.esa.transactionManager.Transaction.entity.Summary;
+import com.blubbax.esa.transactionManager.Transaction.entity.TransactionResourcesAssembler;
 import com.blubbax.esa.transactionManager.Transaction.exception.TransactionNotFoundException;
 import com.blubbax.esa.transactionManager.Transaction.entity.Transaction;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,11 +9,15 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.Link;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.data.web.PagedResourcesAssemblerArgumentResolver;
+import org.springframework.hateoas.*;
 import org.springframework.hateoas.server.mvc.BasicLinkBuilder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,8 +33,14 @@ public class TransactionController {
 
     private final TransactionService transactionService;
 
-    public TransactionController(TransactionService transactionService) {
+    private TransactionResourcesAssembler transactionResourcesAssembler;
+
+    @Autowired
+    private PagedResourcesAssembler<Transaction> pagedResourcesAssembler;
+
+    public TransactionController(TransactionService transactionService, TransactionResourcesAssembler transactionResourcesAssembler) {
         this.transactionService = transactionService;
+        this.transactionResourcesAssembler = transactionResourcesAssembler;
     }
 
     @Operation(summary = "Get root system info")
@@ -59,7 +70,7 @@ public class TransactionController {
 
     @Operation(summary = "Get all transactions for a user")
     @GetMapping(value = "/api/transaction/user/{userId}", produces = { "application/hal+json" })
-    public CollectionModel<Transaction> getAllTransactionDatasetsByUser(
+    public ResponseEntity getAllTransactionDatasetsByUser(
             @PathVariable String userId,
             @RequestParam(value = "page", defaultValue = "0", required = false) int page,
             @RequestParam(value = "size", defaultValue = "10", required = false) int size) {
@@ -70,32 +81,13 @@ public class TransactionController {
             throw new TransactionNotFoundException(null);
         }
 
-        List<Transaction> transcations = transcation_page.toList();
+        PagedModel<EntityModel<Transaction>> pagedModel = pagedResourcesAssembler
+                .toModel(transcation_page, transactionResourcesAssembler,
+                        Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, page, size)).toString()
+                        .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), "")));
 
-        for(final Transaction transaction: transcations) {
-            transaction.add(Link.of(linkTo(methodOn(TransactionController.class).getTransactionDataset(transaction.getId())).toString()
-                    .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "self"));
-        }
+        return new ResponseEntity<>(pagedModel, HttpStatus.OK);
 
-        ArrayList<Link> links = new ArrayList<>();
-
-        links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, 0, size)).toString()
-                .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "first"));
-
-        links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, transcation_page.getTotalPages() - 1, size)).toString()
-                .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "last"));
-
-        if (page + 1 < transcation_page.getTotalPages())
-            links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, page + 1, size)).toString()
-                    .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "next"));
-
-        if (page > 0)
-            links.add(Link.of(linkTo(methodOn(TransactionController.class).getAllTransactionDatasetsByUser(userId, page - 1, size)).toString()
-                    .replace(BasicLinkBuilder.linkToCurrentMapping().toString(), ""), "prev"));
-
-        CollectionModel<Transaction> result = CollectionModel.of(transcations, links);
-
-        return result;
     }
 
     @Operation(summary = "Get transaction by its id")
